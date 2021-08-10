@@ -7,6 +7,12 @@ import lombok.Data;
 @Data
 public class Shipment {
 
+    @CsvBindByName(column = "recipientFirstName")
+    private String firstName;
+
+    @CsvBindByName(column = "recipientLastName")
+    private String lastName;
+
     @CsvBindByName(column = "recipientFullName")
     private String recipientFullName;
 

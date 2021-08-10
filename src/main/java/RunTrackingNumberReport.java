@@ -30,7 +30,9 @@ public class RunTrackingNumberReport {
 
         List<Shipment> shipments = buildShipments();
         List<Shipment> shipmentsWithoutDuplicateTrackingNumber = shipments.stream().distinct().collect(Collectors.toList());
-        buildCsvData(shipmentsWithoutDuplicateTrackingNumber, "O2_report");
+        List<Shipment> shipmentsWithoutNullValues = shipmentsWithoutDuplicateTrackingNumber.stream()
+                .filter(shipment -> StringUtils.isNotBlank(shipment.getRecipientPhoneNumber())).collect(Collectors.toList());
+        buildCsvData(shipmentsWithoutNullValues, "O2_report");
     }
 
     private static List<Shipment> buildShipments() {
@@ -49,20 +51,35 @@ public class RunTrackingNumberReport {
         List<String[]> stringArray = new ArrayList();
         stringArray.add(headers);
         shipments.forEach(shipment -> stringArray.add(new String[] {
-                shipment.getRecipientFullName(),
-                shipment.getRecipientPhoneNumber(),
-                shipment.getAddress(),
-                shipment.getAddressCity(),
-                shipment.getAddressState(),
-                shipment.getAddressZip(),
-                shipment.getTrackingNumber(),
-                retrieveTrackingUrl(shipment.getDeliveryCompany()),
-                retrieveTrackingUrl(shipment.getTrackingNumber(), shipment.getDeliveryCompany())
+                retrieveDefaultValue(retrieveRecipientFullName(shipment)),
+                retrieveDefaultValue(shipment.getRecipientPhoneNumber()),
+                retrieveDefaultValue(shipment.getAddress()),
+                retrieveDefaultValue(shipment.getAddressCity()),
+                retrieveDefaultValue(shipment.getAddressState()),
+                retrieveDefaultValue(shipment.getAddressZip()),
+                retrieveDefaultValue(shipment.getTrackingNumber()),
+                retrieveDefaultValue(retrieveCompanyDelivery(shipment.getDeliveryCompany())),
+                retrieveDefaultValue(retrieveTrackingUrl(shipment.getTrackingNumber(), shipment.getDeliveryCompany()))
         }));
         writeCsv(stringArray, fileName, output);
     }
 
-    private static String retrieveTrackingUrl(String companyDelivery) {
+    private static String retrieveDefaultValue(String value) {
+        if (StringUtils.isNotBlank(value)) {
+            return value;
+        }
+        return " ";
+    }
+
+    private static String retrieveRecipientFullName(Shipment shipment) {
+        if (StringUtils.isNotBlank(shipment.getRecipientFullName())) {
+            return shipment.getRecipientFullName();
+        }
+
+        return shipment.getFirstName() + " " + shipment.getLastName();
+    }
+
+    private static String retrieveCompanyDelivery(String companyDelivery) {
         if (StringUtils.isBlank(companyDelivery)) {
             return "UPS";
         }
