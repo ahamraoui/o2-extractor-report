@@ -54,7 +54,7 @@ public class RunTrackingNumberReport {
         stringArray.add(headers);
         shipments.forEach(shipment -> stringArray.add(new String[] {
                 retrieveWithDefaultValue(retrieveRecipientFullName(shipment)),
-                retrieveWithDefaultValue(shipment.getRecipientPhoneNumber()),
+                retrieveWithTrim(shipment.getRecipientPhoneNumber()),
                 retrieveWithDefaultValue(shipment.getAddress()),
                 retrieveWithDefaultValue(shipment.getAddressCity()),
                 retrieveWithDefaultValue(shipment.getAddressState()),
@@ -69,7 +69,8 @@ public class RunTrackingNumberReport {
 
     private static String retrieveWithTrim(String value) {
         if (StringUtils.isNotBlank(value)) {
-            return value.trim();
+            String trimString = value.trim();
+            return StringUtils.deleteWhitespace(trimString);
         }
         return " ";
     }
