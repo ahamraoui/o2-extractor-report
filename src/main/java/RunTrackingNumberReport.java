@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import static com.bazayer.utils.ReportingUtils.getDateFormat;
 import static com.bazayer.utils.ReportingUtils.writeCsv;
 
 public class RunTrackingNumberReport {
@@ -45,26 +46,36 @@ public class RunTrackingNumberReport {
         return shipments;
     }
     private static void buildCsvData(List<Shipment> shipments, String fileName) throws Exception {
+        String updateDate = getDateFormat();
         String[] headers = {"recipientFullName", "recipientPhoneNumber", "address", "addressCity", "addressState",
-                "addressZip", "trackingNumber", "deliveryCompany", "trackingUrl"};
+                "addressZip", "trackingNumber", "deliveryCompany", "trackingUrl", "update_date"};
 
         List<String[]> stringArray = new ArrayList();
         stringArray.add(headers);
         shipments.forEach(shipment -> stringArray.add(new String[] {
-                retrieveDefaultValue(retrieveRecipientFullName(shipment)),
-                retrieveDefaultValue(shipment.getRecipientPhoneNumber()),
-                retrieveDefaultValue(shipment.getAddress()),
-                retrieveDefaultValue(shipment.getAddressCity()),
-                retrieveDefaultValue(shipment.getAddressState()),
-                retrieveDefaultValue(shipment.getAddressZip()),
-                retrieveDefaultValue(shipment.getTrackingNumber()),
-                retrieveDefaultValue(retrieveCompanyDelivery(shipment.getDeliveryCompany())),
-                retrieveDefaultValue(retrieveTrackingUrl(shipment.getTrackingNumber(), shipment.getDeliveryCompany()))
+                retrieveWithDefaultValue(retrieveRecipientFullName(shipment)),
+                retrieveWithDefaultValue(shipment.getRecipientPhoneNumber()),
+                retrieveWithDefaultValue(shipment.getAddress()),
+                retrieveWithDefaultValue(shipment.getAddressCity()),
+                retrieveWithDefaultValue(shipment.getAddressState()),
+                retrieveWithDefaultValue(shipment.getAddressZip()),
+                retrieveWithTrim(shipment.getTrackingNumber()),
+                retrieveWithDefaultValue(retrieveCompanyDelivery(shipment.getDeliveryCompany())),
+                retrieveWithDefaultValue(retrieveTrackingUrl(retrieveWithTrim(shipment.getTrackingNumber()), shipment.getDeliveryCompany())),
+                updateDate
         }));
         writeCsv(stringArray, fileName, output);
     }
 
-    private static String retrieveDefaultValue(String value) {
+    private static String retrieveWithTrim(String value) {
+        if (StringUtils.isNotBlank(value)) {
+            return value.trim();
+        }
+        return " ";
+    }
+
+
+    private static String retrieveWithDefaultValue(String value) {
         if (StringUtils.isNotBlank(value)) {
             return value;
         }
