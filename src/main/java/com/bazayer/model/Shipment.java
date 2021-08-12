@@ -39,17 +39,16 @@ public class Shipment {
 
     private String trackingUrl;
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Shipment)) return false;
         Shipment that = (Shipment) o;
-        return Objects.equals(trackingNumber, that.trackingNumber) && Objects.equals(recipientFullName, that.recipientFullName);
+        return Objects.equals(trackingNumber, that.trackingNumber);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(trackingNumber, recipientFullName);
+        return Objects.hash(trackingNumber);
     }
 }
