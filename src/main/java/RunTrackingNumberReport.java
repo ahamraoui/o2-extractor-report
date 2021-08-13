@@ -55,7 +55,7 @@ public class RunTrackingNumberReport {
         shipments.forEach(shipment -> stringArray.add(new String[] {
                 retrieveWithDefaultValue(retrieveRecipientFullName(shipment)),
                 retrieveWithTrim(shipment.getRecipientPhoneNumber()),
-                retrieveWithDefaultValue(shipment.getAddress()),
+                retrieveWithDefaultValue(retrieveAddress(shipment.getAddress())),
                 retrieveWithDefaultValue(shipment.getAddressCity()),
                 retrieveWithDefaultValue(shipment.getAddressState()),
                 retrieveWithDefaultValue(shipment.getAddressZip()),
@@ -65,6 +65,14 @@ public class RunTrackingNumberReport {
                 updateDate
         }));
         writeCsv(stringArray, fileName, output);
+    }
+
+    private static String retrieveAddress(String address) {
+        if (StringUtils.isNotBlank(address)) {
+            address = address.replaceAll("\\n", "");
+            address = address.replaceAll("\\r", "");
+        }
+        return address;
     }
 
     private static String retrieveWithTrim(String value) {
@@ -84,11 +92,16 @@ public class RunTrackingNumberReport {
     }
 
     private static String retrieveRecipientFullName(Shipment shipment) {
+        String fullName;
         if (StringUtils.isNotBlank(shipment.getRecipientFullName())) {
-            return shipment.getRecipientFullName();
+            fullName = shipment.getRecipientFullName();
+        } else {
+            fullName = shipment.getFirstName() + " " + shipment.getLastName();
         }
+        fullName = fullName.replaceAll("\\n", "");
+        fullName = fullName.replaceAll("\\r", "");
 
-        return shipment.getFirstName() + " " + shipment.getLastName();
+        return fullName;
     }
 
     private static String retrieveCompanyDelivery(String companyDelivery) {
