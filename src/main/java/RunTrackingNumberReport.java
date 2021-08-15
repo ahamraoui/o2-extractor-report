@@ -48,13 +48,13 @@ public class RunTrackingNumberReport {
     private static void buildCsvData(List<Shipment> shipments, String fileName) throws Exception {
         String updateDate = getDateFormat();
         String[] headers = {"recipientFullName", "recipientPhoneNumber", "address", "addressCity", "addressState",
-                "addressZip", "trackingNumber", "deliveryCompany", "trackingUrl", "update_date"};
+                "addressZip", "trackingNumber", "deliveryCompany", "trackingUrl", "update_date", "last8phone"};
 
         List<String[]> stringArray = new ArrayList();
         stringArray.add(headers);
         shipments.forEach(shipment -> stringArray.add(new String[] {
                 retrieveWithDefaultValue(retrieveRecipientFullName(shipment)),
-                retrieveWithTrim(shipment.getRecipientPhoneNumber()),
+                retrieveWithTrim(retrievePhoneNumber(shipment.getRecipientPhoneNumber())),
                 retrieveWithDefaultValue(retrieveAddress(shipment.getAddress())),
                 retrieveWithDefaultValue(shipment.getAddressCity()),
                 retrieveWithDefaultValue(shipment.getAddressState()),
@@ -62,9 +62,35 @@ public class RunTrackingNumberReport {
                 retrieveWithTrim(shipment.getTrackingNumber()),
                 retrieveWithDefaultValue(retrieveCompanyDelivery(shipment.getDeliveryCompany())),
                 retrieveWithDefaultValue(retrieveTrackingUrl(retrieveWithTrim(shipment.getTrackingNumber()), shipment.getDeliveryCompany())),
-                updateDate
+                updateDate,
+                retrieveWithTrim(retrieveLast8PhoneNumber(shipment.getRecipientPhoneNumber()))
         }));
         writeCsv(stringArray, fileName, output);
+    }
+
+    private static String retrievePhoneNumber(String phone) {
+        if (StringUtils.isNotBlank(phone)) {
+            phone = phone.replaceAll("\\n", "");
+            phone = phone.replaceAll("\\r", "");
+            phone = phone.replaceAll("\\(", "");
+            phone = phone.replaceAll("\\)", "");
+            phone = phone.replaceAll("\\+", "");
+            phone = phone.replaceAll(" ", "");
+        }
+        return phone;
+    }
+
+    private static String retrieveLast8PhoneNumber(String phoneValue) {
+        String phone = retrievePhoneNumber(phoneValue);
+        if (StringUtils.isNotBlank(phone)) {
+            String trimPhone = phone.trim();
+            if (trimPhone.length() >= 8) {
+                String last8phoneNumber = trimPhone.substring(trimPhone.length() - 8);
+                return last8phoneNumber;
+            }
+            return trimPhone;
+        }
+        return phone;
     }
 
     private static String retrieveAddress(String address) {
