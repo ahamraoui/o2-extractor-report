@@ -33,6 +33,10 @@ public class RunTrackingNumberReport {
         List<Shipment> shipmentsWithoutDuplicateTrackingNumber = shipments.stream().distinct().collect(Collectors.toList());
         List<Shipment> shipmentsWithoutNullValues = shipmentsWithoutDuplicateTrackingNumber.stream()
                 .filter(shipment -> StringUtils.isNotBlank(shipment.getRecipientPhoneNumber())).collect(Collectors.toList());
+
+        shipments.stream().filter(i -> Collections.frequency(shipments, i) >1)
+                .collect(Collectors.toSet()).forEach(System.out::println);
+
         buildCsvData(shipmentsWithoutNullValues, "O2_report");
     }
 
@@ -58,7 +62,7 @@ public class RunTrackingNumberReport {
                 retrieveWithDefaultValue(retrieveAddress(shipment.getAddress())),
                 retrieveWithDefaultValue(shipment.getAddressCity()),
                 retrieveWithDefaultValue(shipment.getAddressState()),
-                retrieveWithDefaultValue(shipment.getAddressZip()),
+                retrieveWithTrim(shipment.getAddressZip()),
                 retrieveWithTrim(shipment.getTrackingNumber()),
                 retrieveWithDefaultValue(retrieveCompanyDelivery(shipment.getDeliveryCompany())),
                 retrieveWithDefaultValue(retrieveTrackingUrl(retrieveWithTrim(shipment.getTrackingNumber()), shipment.getDeliveryCompany())),

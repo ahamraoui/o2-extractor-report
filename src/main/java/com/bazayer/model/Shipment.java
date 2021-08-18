@@ -44,11 +44,11 @@ public class Shipment {
         if (this == o) return true;
         if (!(o instanceof Shipment)) return false;
         Shipment that = (Shipment) o;
-        return Objects.equals(trackingNumber, that.trackingNumber);
+        return Objects.equals(trackingNumber, that.trackingNumber) && Objects.equals(recipientPhoneNumber, that.recipientPhoneNumber);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(trackingNumber);
+        return Objects.hash(trackingNumber, recipientPhoneNumber);
     }
 }
