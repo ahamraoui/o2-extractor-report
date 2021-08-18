@@ -31,13 +31,21 @@ public class RunTrackingNumberReport {
 
         List<Shipment> shipments = buildShipments();
         List<Shipment> shipmentsWithoutDuplicateTrackingNumber = shipments.stream().distinct().collect(Collectors.toList());
-        List<Shipment> shipmentsWithoutNullValues = shipmentsWithoutDuplicateTrackingNumber.stream()
+        List<Shipment> shipmentsWithoutNullPhoneValues = shipmentsWithoutDuplicateTrackingNumber.stream()
                 .filter(shipment -> StringUtils.isNotBlank(shipment.getRecipientPhoneNumber())).collect(Collectors.toList());
 
+        System.out.println("List without recipient'sphone number : ");
+        System.out.println("#######################################");
+        shipmentsWithoutDuplicateTrackingNumber.stream()
+                .filter(shipment -> StringUtils.isBlank(shipment.getRecipientPhoneNumber()))
+                .collect(Collectors.toList()).forEach(System.out::println);
+        System.out.println("#######################################");
+        System.out.println("Duplicates : ");
+        System.out.println("#######################################");
         shipments.stream().filter(i -> Collections.frequency(shipments, i) >1)
                 .collect(Collectors.toSet()).forEach(System.out::println);
 
-        buildCsvData(shipmentsWithoutNullValues, "O2_report");
+        buildCsvData(shipmentsWithoutNullPhoneValues, "O2_report");
     }
 
     private static List<Shipment> buildShipments() {
